@@ -3011,7 +3011,7 @@
         </button>
         <button onclick="chatAlertHide(true)" class="text-slate-400 p-1" aria-label="إغلاق"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <div id="mdChoose" class="hidden fixed inset-0 z-[80] bg-black/50 flex items-end sm:items-center justify-center p-3" onclick="if(event.target===this)moodleClose()">
+    <div id="mdChoose" class="hidden fixed inset-0 z-[80] bg-black/50 flex items-center justify-center p-4" onclick="if(event.target===this)moodleClose()">
         <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
             <div class="flex items-center justify-between px-4 py-3 bg-slate-800 text-white">
                 <div class="font-bold text-sm"><i class="fa-solid fa-graduation-cap ml-2"></i>فتح منصة Moodle</div>
@@ -3941,7 +3941,17 @@
         function moodleGo(desktop) {
             moodleClose();
             if (desktop) toastMsg('في المتصفح: اضغط ⋮ ثم فعّل «موقع سطح المكتب»');
-            setTimeout(() => { window.open(MOODLE_URL, '_blank', 'noopener'); }, desktop ? 900 : 0);
+            let go = () => {
+                let android = /Android/i.test(navigator.userAgent);
+                if (desktop && android) {
+                    // يفتح مباشرة في متصفح كروم (حيث يتوفر خيار «موقع سطح المكتب»)، وإن لم يتوفر كروم يُفتح الرابط العادي
+                    location.href = 'intent://moodle.unrwa.org/moodle/#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(MOODLE_URL) + ';end';
+                    return;
+                }
+                let a = document.createElement('a'); a.href = MOODLE_URL; a.target = '_blank'; a.rel = 'noopener noreferrer';
+                document.body.appendChild(a); a.click(); a.remove();
+            };
+            setTimeout(go, desktop ? 700 : 0);
         }
         function chatAlertOpen() { chatAlertHide(); switchTab('chat'); }
         // ---- presence: who is online (opened the app in the last few minutes) ----
